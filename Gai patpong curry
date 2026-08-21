@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ดูโมเดล AR</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body { margin: 0; font-family: sans-serif; text-align: center; }
+    model-viewer {
+      width: 100%;
+      height: 85vh;
+      background-color: #f2f2f2;
+    }
+    h2 { margin: 10px; }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+    }
+    .controls button {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    #resetBtn {
+      border-radius: 8px;
+      width: auto;
+      padding: 0 16px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>ส่องกล้องดูของเล่นในโลก AR</h2>
+
+  <!--
+    *** แก้ 3 จุดนี้ให้ตรงกับไฟล์และขนาดของแต่ละโปรเจค ***
+
+    1) src              = ชื่อไฟล์ .glb ที่อัปโหลดไว้ใน repo นี้ (พิมพ์เล็ก-ใหญ่ต้องตรงเป๊ะ)
+    2) scale            = ขนาด เริ่มลองจาก "0.1 0.1 0.1" แล้วปรับขึ้น/ลงทีละเท่าตัว
+                          (เช่น 0.01 → 0.1 → 1) จนกว่าขนาดจะพอดี
+    3) orientation      = มุมหมุน "Xdeg Ydeg Zdeg" ปรับถ้าโมเดลเอียง/คว่ำผิดด้าน
+                          เช่น "90deg 0deg 0deg" หรือ "-90deg 0deg 0deg"
+  -->
+  <model-viewer
+    id="viewer"
+    src="Gai patpong curry.glb"
+    alt="โมเดล 3 มิติ"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-placement="floor"
+    ar-scale="fixed"
+    scale="0.1 0.1 0.1"
+    orientation="0deg 0deg 0deg"
+    camera-controls
+    touch-action="pan-y"
+    auto-rotate
+    shadow-intensity="1"
+    camera-orbit="0deg 75deg 2.5m"
+  >
+    <button slot="ar-button" style="
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-size: 16px;
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+      ">
+      📱 ดูในโลกจริง (AR)
+    </button>
+  </model-viewer>
+
+  <div class="controls">
+    <button id="zoomOutBtn" title="ย่อ">−</button>
+    <button id="resetBtn" title="รีเซ็ตมุมมอง">รีเซ็ต</button>
+    <button id="zoomInBtn" title="ขยาย">+</button>
+  </div>
+
+  <script>
+    const viewer = document.getElementById('viewer');
+    const defaultOrbit = { theta: 0, phi: 75, radius: 2.5 };
+
+    function getOrbit() {
+      const o = viewer.getCameraOrbit();
+      return { theta: o.theta, phi: o.phi, radius: o.radius };
+    }
+    function setOrbit(theta, phi, radius) {
+      viewer.cameraOrbit = `${theta}rad ${phi}rad ${radius}m`;
+    }
+    document.getElementById('zoomInBtn').addEventListener('click', () => {
+      const o = getOrbit();
+      setOrbit(o.theta, o.phi, Math.max(0.5, o.radius - 0.5));
+    });
+    document.getElementById('zoomOutBtn').addEventListener('click', () => {
+      const o = getOrbit();
+      setOrbit(o.theta, o.phi, Math.min(10, o.radius + 0.5));
+    });
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      viewer.cameraOrbit = `${defaultOrbit.theta}deg ${defaultOrbit.phi}deg ${defaultOrbit.radius}m`;
+      viewer.jumpCameraToGoal();
+    });
+  </script>
+
+</body>
+</html>
